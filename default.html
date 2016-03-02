@@ -19,11 +19,11 @@
         .nav {font-size:20px;font-weight:bold;display:block;cursor:pointer;vertical-align:middle}
         .nav:hover {color:green}
         .elected {background-color:darkred;color:white;padding:1px;}
+        .party_all {color:gray;}
         .party_ndp {color:orange;}
         .party_grn {color:green;}
         .party_pc {color:red;}
         .party_lib {color:blue;}
-        .party_ {color:gray;}
     </style>
 </head>
 <body>
@@ -82,7 +82,7 @@
 
         for(var i=0;i<curListing.length;i++)
         {
-            ridingHTML += '<li class="party_' + curListing[i].partyCode.trim().toLowerCase() + '">'
+            ridingHTML += '<li class="party_all party_' + curListing[i].partyCode.trim().toLowerCase() + '">'
                 + curListing[i].name.trim()
                 + ' - total votes: ' + curListing[i].votes
                 + ' - Percentage: ' + calPercentage(curListing[i].votes, totalVotes) + '%';
