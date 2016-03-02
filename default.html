@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Carousel</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.6/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="controller.js"></script>
+    <style type="text/css">
+        #header {clear:both;width:700px;text-align:center;color:#999;font-weight:bold;}
+        #carousel div {float:left; margin: 20px;}
+        #currentRiding {width:500px;min-height:500px;border:1px solid #0094ff;}
+        #name {font-size:1.5em;text-align:center;float:none;width:90%;}
+        h1 {text-align:center;}
+        #listing {clear:both;margin-top:20px;}
+        .nav {font-size:20px;font-weight:bold;display:block;cursor:pointer;vertical-align:middle}
+        .nav:hover {color:green}
+        .elected {background-color:darkred;color:white;padding:1px;}
+        .party_ndp {color:orange;}
+        .party_grn {color:green;}
+        .party_pc {color:red;}
+        .party_lib {color:blue;}
+        .party_ {color:gray;}
+    </style>
+</head>
+<body>
+    <div id="header"><h3>Election Results</h3></div>
+    <div id="carousel">
+        <div class="nav" title="Previous Riding" onclick="previousRiding()"> << </div>
+        <div id="currentRiding">
+            <div id="name"></div>
+            <div id="listing"></div>
+        </div>
+        <div class="nav" title="Next Riding" onclick="nextRiding()"> >> </div>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    var ridings = [];
+    var totalRidings = 0;
+    var url = "http://static.globalnews.ca/content/test/results-2011.js?callback=?";
+    var currentIdx = 0;
+    jQuery.ajax({
+        type: 'GET',
+        url: url,
+        async: false,
+        jsonpCallback: 'gNews_getRidingDetailsCallback',
+        contentType: "application/json",
+        dataType: 'jsonp',
+        success: function (data) {
+            ridings = data;
+            totalRidings = data.length;
+            setCurrentRiding();
+        },
+        error: function (e) {
+            console.log(e.message);
+        }
+    });
+
+    function setCurrentRiding()
+    {
+        $('#name').html(ridings[currentIdx].name);
+        var curListing = ridings[currentIdx].results;
+        curListing.sort(function (a, b) {
+            if (a.votes > b.votes) {
+                return 1;
+            }
+            if (a.votes < b.votes) {
+                return -1;
+            }
+            return 0;
+        });
+        var ridingHTML = '<ul>';
+        var totalVotes = 0;
+        for (var i = 0; i < curListing.length; i++)
+        {
+            totalVotes += parseInt(curListing[i].votes);
+        }
+
+        for(var i=0;i<curListing.length;i++)
+        {
+            ridingHTML += '<li class="party_' + curListing[i].partyCode.trim().toLowerCase() + '">'
+                + curListing[i].name.trim()
+                + ' - total votes: ' + curListing[i].votes
+                + ' - Percentage: ' + calPercentage(curListing[i].votes, totalVotes) + '%';
+            if (curListing[i].isElected)
+            {
+                ridingHTML += ' <span class="elected">(Elected!)</span>';
+            }
+            ridingHTML += '</li>';
+            }
+        ridingHTML += '</ul>';
+        $('#listing').html(ridingHTML);
+    }
+    function nextRiding()
+    {
+        if (currentIdx < totalRidings-1)
+            currentIdx++;
+        else
+            currentIdx = 0;
+        setCurrentRiding();
+    }
+    function previousRiding() {
+        if (currentIdx > 0)
+            currentIdx--;
+        else
+            currentIdx = totalRidings-1;
+        setCurrentRiding();
+    }
+    function calPercentage(votes, totalVotes)
+    {
+        return Math.round(votes * 100 / totalVotes);
+    }
+</script>
